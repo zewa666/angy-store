@@ -1,14 +1,19 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { ANGyStoreModule } from 'a-ngy-store';
 
 import { AppComponent } from './app.component';
+import { initialState } from "./state";
+import { FooBarComponent } from './foo-bar/foo-bar.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    FooBarComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    ANGyStoreModule.forRoot({ initialState })
   ],
   providers: [],
   bootstrap: [AppComponent]
