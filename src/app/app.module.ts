@@ -1,10 +1,10 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { ANGyStoreModule } from 'a-ngy-store';
+import { BrowserModule } from "@angular/platform-browser";
+import { NgModule } from "@angular/core";
+import { ANGyStoreModule } from "a-ngy-store";
 
-import { AppComponent } from './app.component';
+import { AppComponent } from "./app.component";
 import { initialState } from "./state";
-import { FooBarComponent } from './foo-bar/foo-bar.component';
+import { FooBarComponent } from "./foo-bar/foo-bar.component";
 
 @NgModule({
   declarations: [
@@ -13,7 +13,7 @@ import { FooBarComponent } from './foo-bar/foo-bar.component';
   ],
   imports: [
     BrowserModule,
-    ANGyStoreModule.forRoot({ initialState })
+    ANGyStoreModule.forRoot({ initialState, freeze: true })
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,7 +1,7 @@
 <div class="content" role="main">
 
   <button (click)="clickMe()">CLICK ME</button>
-  <span>{{state.firstName}} {{state.lastName}}</span>
+  <span>{{storeService.computed.fullName.value}}</span>
 
   <an-foo-bar></an-foo-bar>
 </div>

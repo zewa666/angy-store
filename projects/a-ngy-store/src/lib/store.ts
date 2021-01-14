@@ -23,6 +23,7 @@ export interface StoreOptions<T = any> {
   propagateError?: boolean;
   logDefinitions?: LogDefinitions;
   devToolsOptions?: DevToolsOptions;
+  freeze?: boolean;
   initialState: T;
 }
 
@@ -51,7 +52,7 @@ export class UnregisteredActionError<T, P extends any[]> extends Error {
 @Injectable({
   providedIn: 'root'
 })
-export class Store<T = any> {
+export class Store<T> {
   public readonly state: Observable<T>;
 
   private logger: LoggerIndexed;
@@ -83,6 +84,15 @@ export class Store<T = any> {
     if (isUndoable) {
       this.registerHistoryMethods();
     }
+  }
+
+  public computed: { [key: string]: { value: unknown, func: (state: T) => unknown } } = {};
+
+  public registerComputed(name: string, func: (state: T) => unknown) {
+    this.computed[name] = {
+      value: func(this._state.value),
+      func
+    };
   }
 
   public registerMiddleware<S extends undefined>(reducer: Middleware<T, undefined>, placement: MiddlewarePlacement): void;
@@ -124,7 +134,7 @@ export class Store<T = any> {
   }
 
   public resetToState(state: T) {
-    this._state.next(state);
+    this.next(state);
   }
 
   public dispatch<P extends any[]>(reducer: Reducer<T, P> | string, ...params: P): Promise<void> {
@@ -224,7 +234,7 @@ export class Store<T = any> {
     }
 
     const beforeMiddleswaresResult = await this.executeMiddlewares(
-      this._state.getValue(),
+      this.options.freeze ? Object.freeze(this._state.getValue()) : this._state.getValue(),
       MiddlewarePlacement.Before,
       callingAction
     );
@@ -272,7 +282,7 @@ export class Store<T = any> {
       resultingState = applyLimits(resultingState, this.options.history.limit);
     }
 
-    this._state.next(resultingState);
+    this.next(resultingState);
     this.performance.mark("dispatch-end");
 
     if (this.options.measurePerformance === PerformanceMeasurement.StartEnd) {
@@ -308,7 +318,10 @@ export class Store<T = any> {
       // tslint:disable-next-line: variable-name
       .reduce(async (prev: any, curr, _, _arr) => {
         try {
-          const result = await curr[0](await prev, this._state.getValue(), curr[1].settings, action);
+          const result = await curr[0](await prev, this.options.freeze
+            ? Object.freeze(this._state.getValue())
+            : this._state.getValue(),
+            curr[1].settings, action);
 
           if (result === false) {
             _arr = [];
@@ -363,7 +376,7 @@ export class Store<T = any> {
           switch (message.payload.type) {
             case "JUMP_TO_STATE":
             case "JUMP_TO_ACTION":
-              this._state.next(JSON.parse(message.state));
+              this.next(JSON.parse(message.state));
               return;
             case "COMMIT":
               this.devTools.init(this._state.getValue());
@@ -392,6 +405,11 @@ export class Store<T = any> {
 
   private registerHistoryMethods() {
     this.registerAction("jump", jump as Reducer<T>);
+  }
+
+  private next(state: T) {
+    this._state.next(state);
+    Object.values(this.computed).forEach(c => c.value = c.func(state));
   }
 }
 

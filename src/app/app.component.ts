@@ -1,21 +1,25 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Store } from 'a-ngy-store';
-import { Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Store } from "a-ngy-store";
+import { Subscription } from "rxjs";
 
-import { initialState, State } from './state';
+import { initialState, State } from "./state";
 
 @Component({
-  selector: 'an-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: "an-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"]
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'aNGy';
+  title = "aNGy";
   public state: State = initialState;
 
   private subscription!: Subscription;
 
-  constructor(private storeService: Store<State>) {}
+  constructor(public storeService: Store<State>) {
+    this.storeService.registerComputed("fullName", (state) => {
+      return `${state.firstName} ${state.lastName}`;
+    });
+  }
 
   ngOnInit(): void {
     this.storeService.registerAction("foo", foo);
@@ -32,5 +36,9 @@ export class AppComponent implements OnInit, OnDestroy {
 }
 
 export const foo = (state: State, firstName: string, lastName: string): State => {
+  // state.firstName = firstName;
+  // state.lastName = lastName;
+
+  // return state;
   return { ...state, firstName, lastName };
 };
