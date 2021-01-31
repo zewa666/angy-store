@@ -5,6 +5,7 @@ import { ANGyStoreModule } from "a-ngy-store";
 import { AppComponent } from "./app.component";
 import { initialState } from "./state";
 import { FooBarComponent } from "./foo-bar/foo-bar.component";
+import { environment } from "../environments/environment";
 
 @NgModule({
   declarations: [
@@ -13,7 +14,7 @@ import { FooBarComponent } from "./foo-bar/foo-bar.component";
   ],
   imports: [
     BrowserModule,
-    ANGyStoreModule.forRoot({ initialState, freeze: true })
+    ANGyStoreModule.forRoot({ initialState, freeze: environment.production })
   ],
   providers: [],
   bootstrap: [AppComponent]
